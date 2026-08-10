@@ -1,0 +1,49 @@
+  canonical baseline
+    note            : control: both must accept, nonce=1 balance=5
+    leaf rlp        : f8440105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+
+≠ balance with one leading zero byte
+    note            : 0x820005 instead of 0x05
+    leaf rlp        : f84601820005a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+
+≠ nonce with one leading zero byte
+    note            : 0x820001 instead of 0x01
+    leaf rlp        : f84682000105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+
+≠ balance encoded as 0x00 (should be empty string)
+    note            : zero written as 0x00, not 0x80
+    leaf rlp        : f8440000a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=0 balance=0 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+
+≠ storage_root of 31 bytes
+    note            : one byte short of a hash
+    leaf rlp        : f84301059fe81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : REJECT ValueError: expected 32 bytes but got 31
+    evm-sail        : ACCEPT nonce=1 balance=5 storage_root=00e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+
+≠ code_hash of 31 bytes
+    note            : one byte short of a hash
+    leaf rlp        : f8430105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b4219fd2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : REJECT ValueError: expected 32 bytes but got 31
+    evm-sail        : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=00d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+
+  storage_root of 33 bytes
+    note            : one byte over a hash
+    leaf rlp        : f8450105a10056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : REJECT ValueError: expected 32 bytes but got 33
+    evm-sail        : REJECT fatal_error(2)
+
+  non-minimal framing on balance
+    note            : 0x8105 instead of the single byte 0x05
+    leaf rlp        : f845018105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : REJECT DecodingError: 
+    evm-sail        : REJECT fatal_error(2)
+
+5 divergence(s) out of 8 case(s).
