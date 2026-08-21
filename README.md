@@ -21,7 +21,7 @@ executed against both implementations:
 
 ```bash
 git clone https://github.com/frisitano/evm-sail.git
-git -C evm-sail checkout 45fc3fce902fe4853e9d53bfafe2446ed5ab51aa
+git -C evm-sail checkout 9814fa5380730528723b609ca80b347f80cefb1e
 git clone https://github.com/ethereum/execution-specs.git
 git -C execution-specs checkout e5a8caf1b8055e4d805c7fb169edfa710914b7da
 
