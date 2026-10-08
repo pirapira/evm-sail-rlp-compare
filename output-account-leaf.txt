@@ -1,49 +1,124 @@
   canonical baseline
-    note            : control: both must accept, nonce=1 balance=5
+    note            : control: all must accept, nonce=1 balance=5
     leaf rlp        : f8440105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     evm-sail        : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    leanerSTFSpec   : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : all agree
 
 ≠ balance with one leading zero byte
     note            : 0x820005 instead of 0x05
     leaf rlp        : f84601820005a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ nonce with one leading zero byte
     note            : 0x820001 instead of 0x01
     leaf rlp        : f84682000105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ balance encoded as 0x00 (should be empty string)
     note            : zero written as 0x00, not 0x80
     leaf rlp        : f8440000a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : ACCEPT nonce=0 balance=0 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=0 balance=0 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ storage_root of 31 bytes
     note            : one byte short of a hash
     leaf rlp        : f84301059fe81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : REJECT ValueError: expected 32 bytes but got 31
     evm-sail        : ACCEPT nonce=1 balance=5 storage_root=00e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ code_hash of 31 bytes
     note            : one byte short of a hash
     leaf rlp        : f8430105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b4219fd2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : REJECT ValueError: expected 32 bytes but got 31
     evm-sail        : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=00d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : specs = leaner ≠ evm-sail
 
   storage_root of 33 bytes
     note            : one byte over a hash
     leaf rlp        : f8450105a10056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : REJECT ValueError: expected 32 bytes but got 33
     evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : all agree
 
   non-minimal framing on balance
     note            : 0x8105 instead of the single byte 0x05
     leaf rlp        : f845018105a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
     execution-specs : REJECT DecodingError: 
     evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : all agree
 
-5 divergence(s) out of 8 case(s).
+≠ nonce encoded as the empty list
+    note            : 0xc0 instead of 0x80; `if decoded[0]` treats [] as falsy
+    leaf rlp        : f844c005a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=0 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=0 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
+
+≠ balance encoded as the empty list
+    note            : 0xc0 instead of 0x80
+    leaf rlp        : f84401c0a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=1 balance=0 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=1 balance=0 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
+
+  storage_root encoded as the empty list
+    note            : 0xc0; specs and leaner substitute EMPTY_TRIE_ROOT
+    leaf rlp        : e40105c0a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    leanerSTFSpec   : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : all agree
+
+  storage_root and code_hash as empty strings
+    note            : control: all three substitute the empty-root/empty-code defaults
+    leaf rlp        : c401058080
+    execution-specs : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    leanerSTFSpec   : ACCEPT nonce=1 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : all agree
+
+≠ nonce of 2**64 (9 bytes, canonical)
+    note            : nonce is an unbounded Uint in specs and leaner, uint64 in evm-sail
+    leaf rlp        : f84d8901000000000000000005a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=18446744073709551616 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=18446744073709551616 balance=5 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
+
+≠ balance of 2**256 - 1 behind a leading zero (33 bytes)
+    note            : fits U256 numerically, but is 33 bytes long
+    leaf rlp        : f86501a100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffa056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : ACCEPT nonce=1 balance=115792089237316195423570985008687907853269984665640564039457584007913129639935 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT nonce=1 balance=115792089237316195423570985008687907853269984665640564039457584007913129639935 storage_root=56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421 code_hash=c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    agreement       : specs = leaner ≠ evm-sail
+
+  balance of 2**256
+    note            : control: overflows U256 everywhere
+    leaf rlp        : f86501a1010000000000000000000000000000000000000000000000000000000000000000a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a0c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+    execution-specs : REJECT OverflowError: 
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : all agree
+
+15 case(s). Disagreements by pair:
+  specs vs evm-sail: 9
+  specs vs leaner: 0
+  evm-sail vs leaner: 9

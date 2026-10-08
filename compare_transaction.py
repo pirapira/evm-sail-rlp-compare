@@ -6,6 +6,10 @@
                     and every fixed-width field for exact length)
   evm-sail        : evm.lib.rlp.codecs.transactions.rlp_decode_tx
                     (sail/lib/rlp/codecs/transactions.sail)
+  leanerSTFSpec   : no transaction decoder yet (EthBlock is scaffolding), so
+                    leaner/LeanerDecode.lean applies its typed RLP field
+                    adapters (STFSpec/Codec/RlpTyped.lean) to the EELS
+                    FeeMarketTransaction schema, field by field
 
 Usage:
     venv/bin/python compare_transaction.py
@@ -14,6 +18,8 @@ Usage:
 from __future__ import annotations
 
 from evm_sail_path import add_extraction_to_sys_path
+from leaner_stf import run_batch
+from report import report
 
 add_extraction_to_sys_path()
 
@@ -96,7 +102,8 @@ def run_specs(tx_bytes: bytes) -> str:
             f"ACCEPT y_parity={int(tx.y_parity)} to=0x{bytes(tx.to).hex()}"
         )
     except Exception as exc:  # noqa: BLE001
-        return f"REJECT {type(exc).__name__}: {str(exc)[:70]}"
+        reason = " ".join(str(exc).split())  # one line, however EELS words it
+        return f"REJECT {type(exc).__name__}: {reason[:70]}"
 
 
 def run_sail(tx_bytes: bytes) -> str:
@@ -146,21 +153,13 @@ CASES: list[tuple[str, bytes, str]] = [
 
 
 def main() -> int:
-    divergences = 0
-    for name, tx_bytes, note in CASES:
-        specs = run_specs(tx_bytes)
-        sail = run_sail(tx_bytes)
-        agree = specs.split()[0] == sail.split()[0]
-        if not agree:
-            divergences += 1
-        print(f"{'  ' if agree else '≠ '}{name}")
-        print(f"    note            : {note}")
-        print(f"    tx bytes        : {tx_bytes.hex()}")
-        print(f"    execution-specs : {specs}")
-        print(f"    evm-sail        : {sail}")
-        print()
-    print(f"{divergences} divergence(s) out of {len(CASES)} case(s).")
-    return 0
+    leaner = run_batch([("tx", tx_bytes) for _, tx_bytes, _ in CASES])
+    return report(
+        [
+            (name, note, "tx bytes", tx_bytes, run_specs(tx_bytes), run_sail(tx_bytes), lean)
+            for (name, tx_bytes, note), lean in zip(CASES, leaner)
+        ]
+    )
 
 
 if __name__ == "__main__":

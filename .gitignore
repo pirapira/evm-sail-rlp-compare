@@ -5,3 +5,4 @@ __pycache__/
 # Checkouts the scripts read; clone them yourself (see the README).
 /evm-sail/
 /execution-specs/
+/leanerSTFSpec/

@@ -1,0 +1,84 @@
+  canonical baseline
+    note            : control: all must accept, value=5
+    leaf rlp        : 05
+    execution-specs : ACCEPT value=5
+    evm-sail        : ACCEPT value=5
+    leanerSTFSpec   : ACCEPT value=5
+    agreement       : all agree
+
+≠ value with one leading zero byte
+    note            : 0x820005 instead of 0x05
+    leaf rlp        : 820005
+    execution-specs : ACCEPT value=5
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT value=5
+    agreement       : specs = leaner ≠ evm-sail
+
+≠ value 0 written as 0x00
+    note            : a zero slot is never stored; 0x00 is also non-canonical
+    leaf rlp        : 00
+    execution-specs : ACCEPT value=0
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT value=0
+    agreement       : specs = leaner ≠ evm-sail
+
+  value 0 written as 0x80
+    note            : a zero slot is never stored, but this is the canonical zero
+    leaf rlp        : 80
+    execution-specs : ACCEPT value=0
+    evm-sail        : ACCEPT value=0
+    leanerSTFSpec   : ACCEPT value=0
+    agreement       : all agree
+
+≠ leaf is the empty list
+    note            : 0xc0; specs and leaner map any list to 0
+    leaf rlp        : c0
+    execution-specs : ACCEPT value=0
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT value=0
+    agreement       : specs = leaner ≠ evm-sail
+
+≠ leaf is a non-empty list
+    note            : 0xc105; specs and leaner map any list to 0
+    leaf rlp        : c105
+    execution-specs : ACCEPT value=0
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT value=0
+    agreement       : specs = leaner ≠ evm-sail
+
+≠ value of 2**256 - 1 behind a leading zero (33 bytes)
+    note            : fits U256 numerically, but is 33 bytes long
+    leaf rlp        : a100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    execution-specs : ACCEPT value=115792089237316195423570985008687907853269984665640564039457584007913129639935
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : ACCEPT value=115792089237316195423570985008687907853269984665640564039457584007913129639935
+    agreement       : specs = leaner ≠ evm-sail
+
+  value of 2**256
+    note            : control: overflows U256 everywhere
+    leaf rlp        : a1010000000000000000000000000000000000000000000000000000000000000000
+    execution-specs : REJECT OverflowError: 
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : all agree
+
+  non-minimal framing
+    note            : control: 0x8105 instead of the single byte 0x05
+    leaf rlp        : 8105
+    execution-specs : REJECT DecodingError: 
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : all agree
+
+  trailing byte after the item
+    note            : 0x0500: one item followed by garbage
+    leaf rlp        : 0500
+    execution-specs : REJECT DecodingError: negative length
+    evm-sail        : REJECT fatal_error(2)
+    leanerSTFSpec   : REJECT malformed(leaf)
+    agreement       : all agree
+
+10 case(s). Disagreements by pair:
+  specs vs evm-sail: 5
+  specs vs leaner: 0
+  evm-sail vs leaner: 5

@@ -3,33 +3,42 @@
     tx bytes        : 02f862018001028252089411111111111111111111111111111111111111118080c080a01111111111111111111111111111111111111111111111111111111111111111a02222222222222222222222222222222222222222222222222222222222222222
     execution-specs : ACCEPT y_parity=0 to=0x1111111111111111111111111111111111111111
     evm-sail        : ACCEPT y_parity=0 to=0x1111111111111111111111111111111111111111
+    leanerSTFSpec   : ACCEPT y_parity=0 to=0x1111111111111111111111111111111111111111
+    agreement       : all agree
 
 ≠ y_parity encoded as 0x00
     note            : a leading (and only) zero byte instead of 0x80
     tx bytes        : 02f862018001028252089411111111111111111111111111111111111111118080c000a01111111111111111111111111111111111111111111111111111111111111111a02222222222222222222222222222222222222222222222222222222222222222
-    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction`
-	because cannot decode field
+    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction` because cannot decode field 
     evm-sail        : ACCEPT y_parity=0 to=0x1111111111111111111111111111111111111111
+    leanerSTFSpec   : REJECT nonCanonical(integer leading zero)
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ y_parity 1 with a leading zero byte
     note            : 0x820001 instead of 0x01
     tx bytes        : 02f864018001028252089411111111111111111111111111111111111111118080c0820001a01111111111111111111111111111111111111111111111111111111111111111a02222222222222222222222222222222222222222222222222222222222222222
-    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction`
-	because cannot decode field
+    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction` because cannot decode field 
     evm-sail        : ACCEPT y_parity=1 to=0x1111111111111111111111111111111111111111
+    leanerSTFSpec   : REJECT nonCanonical(integer leading zero)
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ to of 19 bytes
     note            : one byte short of an address
     tx bytes        : 02f8610180010282520893111111111111111111111111111111111111118080c080a01111111111111111111111111111111111111111111111111111111111111111a02222222222222222222222222222222222222222222222222222222222222222
-    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction`
-	because cannot decode field
+    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction` because cannot decode field 
     evm-sail        : ACCEPT y_parity=0 to=0x0011111111111111111111111111111111111111
+    leanerSTFSpec   : REJECT shape(no union variant)
+    agreement       : specs = leaner ≠ evm-sail
 
 ≠ to of 21 bytes
     note            : one byte over an address
     tx bytes        : 02f8630180010282520895aa11111111111111111111111111111111111111118080c080a01111111111111111111111111111111111111111111111111111111111111111a02222222222222222222222222222222222222222222222222222222222222222
-    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction`
-	because cannot decode field
+    execution-specs : REJECT DecodingError: cannot decode into `FeeMarketTransaction` because cannot decode field 
     evm-sail        : ACCEPT y_parity=0 to=0x1111111111111111111111111111111111111111
+    leanerSTFSpec   : REJECT shape(no union variant)
+    agreement       : specs = leaner ≠ evm-sail
 
-4 divergence(s) out of 5 case(s).
+5 case(s). Disagreements by pair:
+  specs vs evm-sail: 4
+  specs vs leaner: 0
+  evm-sail vs leaner: 4

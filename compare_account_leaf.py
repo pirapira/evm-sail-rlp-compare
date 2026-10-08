@@ -1,12 +1,15 @@
-"""Differential test: RLP scalar strictness in evm-sail vs execution-specs.
+"""Differential test: RLP scalar strictness in evm-sail, execution-specs and
+leanerSTFSpec.
 
-Both implementations decode account trie leaves out of the same stateless
-witness.  This script feeds identical leaf encodings to both decoders and
-reports where they disagree.
+All three decode account trie leaves out of the same stateless witness.  This
+script feeds identical leaf encodings to each decoder and reports where they
+disagree.
 
   execution-specs : ethereum.forks.amsterdam.witness_state._decode_account_from_leaf
   evm-sail        : evm.lib.rlp.codecs.state.decode_state_account
                     (sail/lib/rlp/codecs/state.sail:11)
+  leanerSTFSpec   : STFSpec.StateCommit.decodeAccountLeaf
+                    (STFSpec/StateCommit/AccountDecode.lean)
 
 Usage:
     venv/bin/python compare_account_leaf.py
@@ -14,9 +17,9 @@ Usage:
 
 from __future__ import annotations
 
-import sys
-
 from evm_sail_path import add_extraction_to_sys_path
+from leaner_stf import run_batch
+from report import report
 
 add_extraction_to_sys_path()
 
@@ -92,7 +95,8 @@ def run_specs(leaf_rlp: bytes) -> str:
             f"code_hash={account.code_hash.hex()}"
         )
     except Exception as exc:  # noqa: BLE001
-        return f"REJECT {type(exc).__name__}: {str(exc)[:60]}"
+        reason = " ".join(str(exc).split())  # one line, however EELS words it
+        return f"REJECT {type(exc).__name__}: {reason[:60]}"
 
 
 def run_sail(leaf_rlp: bytes) -> str:
@@ -118,7 +122,7 @@ CASES: list[tuple[str, bytes, str]] = [
     (
         "canonical baseline",
         leaf(rlp_str(b"\x01"), rlp_str(b"\x05"), rlp_str(ROOT32), rlp_str(CODE32)),
-        "control: both must accept, nonce=1 balance=5",
+        "control: all must accept, nonce=1 balance=5",
     ),
     (
         "balance with one leading zero byte",
@@ -168,25 +172,67 @@ CASES: list[tuple[str, bytes, str]] = [
         leaf(rlp_str(b"\x01"), b"\x81\x05", rlp_str(ROOT32), rlp_str(CODE32)),
         "0x8105 instead of the single byte 0x05",
     ),
+    (
+        "nonce encoded as the empty list",
+        leaf(rlp_list([]), rlp_str(b"\x05"), rlp_str(ROOT32), rlp_str(CODE32)),
+        "0xc0 instead of 0x80; `if decoded[0]` treats [] as falsy",
+    ),
+    (
+        "balance encoded as the empty list",
+        leaf(rlp_str(b"\x01"), rlp_list([]), rlp_str(ROOT32), rlp_str(CODE32)),
+        "0xc0 instead of 0x80",
+    ),
+    (
+        "storage_root encoded as the empty list",
+        leaf(rlp_str(b"\x01"), rlp_str(b"\x05"), rlp_list([]), rlp_str(CODE32)),
+        "0xc0; specs and leaner substitute EMPTY_TRIE_ROOT",
+    ),
+    (
+        "storage_root and code_hash as empty strings",
+        leaf(rlp_str(b"\x01"), rlp_str(b"\x05"), rlp_str(b""), rlp_str(b"")),
+        "control: all three substitute the empty-root/empty-code defaults",
+    ),
+    (
+        "nonce of 2**64 (9 bytes, canonical)",
+        leaf(
+            rlp_str((2**64).to_bytes(9, "big")),
+            rlp_str(b"\x05"),
+            rlp_str(ROOT32),
+            rlp_str(CODE32),
+        ),
+        "nonce is an unbounded Uint in specs and leaner, uint64 in evm-sail",
+    ),
+    (
+        "balance of 2**256 - 1 behind a leading zero (33 bytes)",
+        leaf(
+            rlp_str(b"\x01"),
+            rlp_str(b"\x00" + b"\xff" * 32),
+            rlp_str(ROOT32),
+            rlp_str(CODE32),
+        ),
+        "fits U256 numerically, but is 33 bytes long",
+    ),
+    (
+        "balance of 2**256",
+        leaf(
+            rlp_str(b"\x01"),
+            rlp_str((2**256).to_bytes(33, "big")),
+            rlp_str(ROOT32),
+            rlp_str(CODE32),
+        ),
+        "control: overflows U256 everywhere",
+    ),
 ]
 
 
 def main() -> int:
-    divergences = 0
-    for name, leaf_rlp, note in CASES:
-        specs = run_specs(leaf_rlp)
-        sail = run_sail(leaf_rlp)
-        agree = specs.split()[0] == sail.split()[0]
-        if not agree:
-            divergences += 1
-        print(f"{'  ' if agree else '≠ '}{name}")
-        print(f"    note            : {note}")
-        print(f"    leaf rlp        : {leaf_rlp.hex()}")
-        print(f"    execution-specs : {specs}")
-        print(f"    evm-sail        : {sail}")
-        print()
-    print(f"{divergences} divergence(s) out of {len(CASES)} case(s).")
-    return 0
+    leaner = run_batch([("account", leaf_rlp) for _, leaf_rlp, _ in CASES])
+    return report(
+        [
+            (name, note, "leaf rlp", leaf_rlp, run_specs(leaf_rlp), run_sail(leaf_rlp), lean)
+            for (name, leaf_rlp, note), lean in zip(CASES, leaner)
+        ]
+    )
 
 
 if __name__ == "__main__":
