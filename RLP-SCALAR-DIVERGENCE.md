@@ -16,7 +16,7 @@ Eighteen witnesses are given, all executed against all three: W1–W9 from the
 original two-way comparison, plus W10–W18, found by reading leanerSTFSpec's
 account and storage leaf contracts (§6.3).
 
-Pinned revisions: evm-sail `9814fa5380730528723b609ca80b347f80cefb1e`;
+Pinned revisions: evm-sail `adc44afd21ef6d5a45c96046f0d23f527acbf54e`;
 execution-specs `e1a316a06fc3d3e0a5da36fdc78580811e9d8a36` (`tests-zkevm@v21.0.0`,
 the normative target leanerSTFSpec pins in its `reference.toml`), `ethereum-rlp`
 0.1.6; leanerSTFSpec `daa6a8a4e13e3ce9e54c3b4da6f60dac7ac42de0`. W1–W9 were
@@ -311,7 +311,7 @@ predicates suggest this was the intent.
 ```bash
 # the three implementations, cloned beside this repo (or inside it)
 git clone https://github.com/frisitano/evm-sail.git
-git -C evm-sail checkout 9814fa5380730528723b609ca80b347f80cefb1e
+git -C evm-sail checkout adc44afd21ef6d5a45c96046f0d23f527acbf54e
 git clone https://github.com/ethereum/execution-specs.git
 git -C execution-specs fetch origin e1a316a06fc3d3e0a5da36fdc78580811e9d8a36
 git -C execution-specs checkout e1a316a06fc3d3e0a5da36fdc78580811e9d8a36

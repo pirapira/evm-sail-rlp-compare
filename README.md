@@ -34,7 +34,7 @@ the spec's typed RLP field adapters against the EELS transaction schema (see
 
 ```bash
 git clone https://github.com/frisitano/evm-sail.git
-git -C evm-sail checkout 9814fa5380730528723b609ca80b347f80cefb1e
+git -C evm-sail checkout adc44afd21ef6d5a45c96046f0d23f527acbf54e
 git clone https://github.com/ethereum/execution-specs.git
 git -C execution-specs fetch origin e1a316a06fc3d3e0a5da36fdc78580811e9d8a36
 git -C execution-specs checkout e1a316a06fc3d3e0a5da36fdc78580811e9d8a36
